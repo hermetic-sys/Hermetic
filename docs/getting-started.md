@@ -34,7 +34,7 @@ hermetic init --quickstart
 
 The wizard walks through five steps:
 
-**Step 1 — Create your vault.** You'll be prompted for a passphrase (minimum 12 characters). Hermetic derives the encryption key via Argon2id (m=256MB, t=4, p=2) — you'll see a progress indicator during key derivation. That deliberate cost is the security: it makes brute-force attacks computationally infeasible.
+**Step 1 — Create your vault.** You'll be prompted for a passphrase (minimum 12 characters). Hermetic derives the encryption key via Argon2id (memory-hard) — you'll see a progress indicator during key derivation. That deliberate cost is the security: it makes brute-force attacks computationally infeasible.
 
 **Step 2 — Import your API keys.** The wizard detects `.env` files in the current directory, parses them, and matches keys against built-in service templates. For example, `ANTHROPIC_API_KEY` is auto-matched to the Anthropic template (auth scheme: x-api-key, allowed domain: api.anthropic.com). You confirm the import, and each key is encrypted individually with its own HKDF-derived key encryption key. Imported credentials are auto-verified against their service health endpoints so you know immediately if a key is valid.
 
@@ -436,7 +436,7 @@ echo -n "secret-value" | hermetic add new-name \
 
 ### Slow key derivation
 
-This is intentional. Argon2id with m=256MB, t=4, p=2 makes brute-force attacks on your passphrase computationally infeasible. As of V1.0.0, Hermetic shows a spinner during key derivation so the terminal doesn't appear frozen. It only runs once at vault creation and daemon unlock. Session persistence (`--remember-session`) means you only experience this delay after a reboot.
+This is intentional. Argon2id with memory-hard parameters makes brute-force attacks on your passphrase computationally infeasible. As of V1.0.0, Hermetic shows a spinner during key derivation so the terminal doesn't appear frozen. It only runs once at vault creation and daemon unlock. Session persistence (`--remember-session`) means you only experience this delay after a reboot.
 
 ### Clipboard not working in dashboard
 
