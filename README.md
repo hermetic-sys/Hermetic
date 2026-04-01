@@ -8,7 +8,7 @@
 
 **Agent-Isolated Credential Broker for AI Agents**
 
-Your API keys never enter the AI agent's memory. Ever.
+Your keys never enter the agent's memory. Ever.
 
 <br/>
 
