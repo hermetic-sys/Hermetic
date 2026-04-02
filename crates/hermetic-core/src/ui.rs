@@ -145,6 +145,11 @@ fn color_enabled() -> bool {
     *COLOR.get_or_init(supports_color)
 }
 
+/// Public accessor for color_enabled (used by commands::run warning).
+pub fn color_enabled_pub() -> bool {
+    color_enabled()
+}
+
 // ─── ANSI Escape Helpers ────────────────────────────────────────────────────
 
 /// 24-bit ANSI foreground color from RGB.
