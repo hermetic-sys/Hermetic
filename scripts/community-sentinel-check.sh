@@ -93,6 +93,70 @@ else
     FAILED=1
 fi
 
+# S-8: Sensitive information gate — blocks leaks in .md docs
+echo ""
+echo "  S-8 Sensitive information scan (docs)..."
+S8_FAIL=0
+
+# Exclude this script from self-matching
+SELF="scripts/community-sentinel-check.sh"
+
+# Internal doc IDs (HM-EXEC, HM-DR, etc.) in .md files
+HM_COUNT=$(grep -rl 'HM-EXEC-\|HM-DR-\|HM-CERT-\|HM-CONST-\|HM-GOV-\|HM-ARCH-\|HM-FUZZ-\|HM-TEST-\|HM-VISION-\|HM-DESIGN-' --include='*.md' . 2>/dev/null | wc -l)
+if [ "$HM_COUNT" -gt 0 ]; then
+    echo "  S-8 FAIL  Internal doc IDs (HM-*) in .md files: $HM_COUNT"
+    grep -rn 'HM-EXEC-\|HM-DR-\|HM-CERT-\|HM-CONST-' --include='*.md' . | head -5
+    S8_FAIL=1
+fi
+
+# Personal identity
+ID_COUNT=$(grep -rl 'vishal\|chamspter\|PH317\|darbhanga' --include='*.md' --include='*.rs' --include='*.toml' --include='*.yml' --include='*.sh' . 2>/dev/null | grep -v '.git/' | grep -v "$SELF" | wc -l)
+if [ "$ID_COUNT" -gt 0 ]; then
+    echo "  S-8 FAIL  Personal identity found: $ID_COUNT files"
+    S8_FAIL=1
+fi
+
+# Internal paths
+PATH_COUNT=$(grep -rl 'hermetic-oblivion\|/home/vishal\|Hermetic-Vault-main' --include='*.md' --include='*.rs' --include='*.toml' --include='*.yml' --include='*.sh' . 2>/dev/null | grep -v '.git/' | grep -v "$SELF" | wc -l)
+if [ "$PATH_COUNT" -gt 0 ]; then
+    echo "  S-8 FAIL  Internal paths found: $PATH_COUNT files"
+    S8_FAIL=1
+fi
+
+# Old repo name in non-.rs files
+OLD_REPO=$(grep -rl 'Hermetic-Vault' --include='*.md' --include='*.toml' --include='*.yml' --include='*.sh' . 2>/dev/null | grep -v '.git/' | grep -v "$SELF" | wc -l)
+if [ "$OLD_REPO" -gt 0 ]; then
+    echo "  S-8 FAIL  Old repo name (Hermetic-Vault): $OLD_REPO files"
+    S8_FAIL=1
+fi
+
+# Exact metrics in docs (TPF v2)
+METRICS=$(grep -rl '\b935\b\|1\.72B\|1\.6B\|\b415+\b\|69 amend\|41 amend\|46,607\|46,737\|39,154' --include='*.md' . 2>/dev/null | grep -v '.git/' | wc -l)
+if [ "$METRICS" -gt 0 ]; then
+    echo "  S-8 FAIL  Exact metrics in docs: $METRICS files"
+    S8_FAIL=1
+fi
+
+# Competitor names
+COMP=$(grep -rl 'Keycard\|MintMCP\|\bPeta\b\|CyberArk' --include='*.md' . 2>/dev/null | grep -v '.git/' | wc -l)
+if [ "$COMP" -gt 0 ]; then
+    echo "  S-8 FAIL  Competitor names: $COMP files"
+    S8_FAIL=1
+fi
+
+# HC-16 specific: hermetic run must NOT appear in MCP tool registry
+HC16=$(grep -rl '"run"\|RunTool\|run_command' crates/hermetic-mcp/src/ --include='*.rs' 2>/dev/null | wc -l)
+if [ "$HC16" -gt 0 ]; then
+    echo "  S-8 FAIL  HC-16 violation: hermetic run in MCP crate"
+    S8_FAIL=1
+fi
+
+if [ "$S8_FAIL" -eq 0 ]; then
+    echo "  S-8 PASS  No sensitive information leaks"
+else
+    FAILED=1
+fi
+
 echo ""
 echo "══════════════════════════════════════════════════"
 if [ "$FAILED" -eq 0 ]; then
