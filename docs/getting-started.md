@@ -501,9 +501,42 @@ Everything in this guide works with the free Community binary. Security is ident
 
 ---
 
+## Three Ways to Use Credentials
+
+Once your daemon is running, you have three security tiers:
+
+**Brokered** — The agent never sees the credential:
+```bash
+hermetic request --secret openai_key --url https://api.openai.com/v1/models
+```
+
+**Transient** — Credential in child process only, wiped on exit:
+```bash
+hermetic run --secret github_pat --env-var GITHUB_TOKEN -- git push origin main
+```
+
+**Direct** — Print to terminal (passphrase required):
+```bash
+hermetic reveal --secret stripe_key
+```
+
+## Protect Your MCP Servers
+
+Replace plaintext credentials in your IDE config with vault-resolved secrets:
+
+```bash
+hermetic proxy --server github \
+  --credential GITHUB_PERSONAL_ACCESS_TOKEN:github_pat \
+  -- npx -y @modelcontextprotocol/server-github
+```
+
+The proxy relays all messages between your IDE and the MCP server while injecting credentials from the vault, scanning responses for credential leakage, and running the server in an isolated process group. See the [MCP Integration Guide](mcp-integration.md) for full setup.
+
+---
+
 ## What's Next
 
-- **[Security Overview](security-overview.md)** — security model and scope
+- **[Security Overview](security-overview.md)** — security model and defense layers
 - **[MCP Integration Guide](mcp-integration.md)** — detailed setup for each supported AI platform
 - **[Python SDK Guide](python-sdk.md)** — using Hermetic from Python with PyO3 escape-hatch blocking
 - **[CLI Reference](cli-reference.md)** — all subcommands with full options and examples

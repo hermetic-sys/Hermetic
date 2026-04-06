@@ -479,9 +479,45 @@ The audit log (CLI-only, `hermetic audit`) records all MCP operations including 
 
 ---
 
+## MCP Proxy — Protect Any MCP Server
+
+The MCP bridge protects Hermetic's own credentials. The MCP proxy protects credentials for ANY MCP server — GitHub, Slack, Jira, Notion, filesystem, or any custom server.
+
+### Before (credentials in config)
+```json
+{
+  "env": {
+    "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_R3aLT0k3nH3r3..."
+  }
+}
+```
+
+### After (credentials from vault)
+```json
+{
+  "command": "hermetic",
+  "args": [
+    "proxy", "--server", "github",
+    "--credential", "GITHUB_PERSONAL_ACCESS_TOKEN:github_pat",
+    "--", "npx", "-y", "@modelcontextprotocol/server-github"
+  ]
+}
+```
+
+The proxy relays all JSON-RPC messages between the IDE and the MCP server while:
+- Injecting credentials from the vault into the server's environment
+- Scanning every response for credential leakage
+- Pinning tool definitions to detect schema changes
+- Enforcing per-tool allow/deny policy
+- Running the server in an isolated, dump-protected process group
+
+See `hermetic proxy --help` for all options.
+
+---
+
 ## Next Steps
 
 - **[Getting Started](getting-started.md)** — if you haven't set up Hermetic yet
 - **[Python SDK Guide](python-sdk.md)** — using Hermetic from Python scripts and frameworks
 - **[CLI Reference](cli-reference.md)** — all subcommands
-- **[Security Overview](security-overview.md)** — security model and scope
+- **[Security Overview](security-overview.md)** — security model and defense layers

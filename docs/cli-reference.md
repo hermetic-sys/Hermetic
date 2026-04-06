@@ -290,27 +290,107 @@ Uses the same transport pipeline as `request` (shared internal helper) — SSRF 
 
 ---
 
-### exec
+### run
 
-Run a command with a secret injected as an environment variable.
+Credential-aware command runner. Injects a vault credential into a child process environment for the duration of one command.
 
 ```bash
-hermetic exec --secret deploy-token -- ./deploy.sh
-hermetic exec --secret db-password --env-var DATABASE_URL -- ./migrate.sh
+hermetic run --secret github_pat --env-var GITHUB_TOKEN -- git push origin main
+hermetic run --secret aws_key --env-var AWS_ACCESS_KEY_ID -- terraform plan
 ```
 
 | Flag | Description |
 |------|-------------|
-| `--secret <n>` | Secret to inject. |
-| `--env-var <n>` | Environment variable name (default: secret name uppercased). |
-| `--auto-start` | Offer to start daemon if not running (interactive only). Only prompts when flag is passed AND stdin is a TTY. |
+| `--secret <NAME>` | Secret to inject. |
+| `--env-var <VAR>` | Environment variable name (default: secret name uppercased). |
+| `--set-env <VAR=HANDLE>` | Advanced: inject credential as `VAR={handle:name}`. |
+| `--dry-run` | Show substitution plan without executing. |
+| `--yes` | Skip interactive confirmations. |
 | `-- <command> [args...]` | Command and arguments to execute. |
 
-**Security tier:** TRANSIENT. The secret exists in the child process environment for its lifetime.
+The child runs in an isolated process group with a sanitized environment. Dangerous interpreters (sh, bash, python, node) are blocked. Credential is wiped when the command exits.
 
-**Differences from MCP env_spawn:** `exec` inherits the parent environment. MCP `env_spawn` uses `env_clear` (untrusted agent environment). binary blocklist applies to both.
+---
 
-Blocked binaries now explain WHY they're blocked and suggest the direct alternative command.
+### proxy
+
+MCP server proxy with credential injection and leak scanning. Sits between your AI agent and any MCP server, replacing plaintext credentials in config with vault-resolved secrets.
+
+```bash
+hermetic proxy --server github \
+  --credential GITHUB_PERSONAL_ACCESS_TOKEN:github_pat \
+  -- npx -y @modelcontextprotocol/server-github
+```
+
+| Flag | Description |
+|------|-------------|
+| `--server <NAME>` | Server name (for audit log). |
+| `--credential <MAP>` | Credential mapping: `ENV_VAR:secret_name` (repeatable). |
+| `--config <PATH>` | Path to proxy config JSON. |
+| `--generate-config` | Scan IDE configs and generate proxy.json. |
+| `--list` | List configured proxy servers. |
+| `-- <command> [args...]` | MCP server command to proxy. |
+
+Features: credential injection from vault, response scanning for credential leakage, tool definition pinning (detects schema changes), per-tool allow/deny policy, process isolation (new group, sanitized env, dump-protected).
+
+---
+
+### reveal
+
+Print a secret value to the terminal. Requires passphrase re-entry as a safety ceremony.
+
+```bash
+hermetic reveal --secret stripe_key
+hermetic reveal --configure openclaw --install
+```
+
+| Flag | Description |
+|------|-------------|
+| `--secret <NAME>` | Secret to reveal (must match the tagged reveal key). |
+| `--yes` | Skip confirmation prompt. |
+| `--set <NAME>` | Tag a secret as the reveal key (passphrase required). |
+| `--clear` | Clear the reveal key tag (passphrase required). |
+| `--status` | Show which secret is currently tagged. |
+| `--configure <TARGET>` | Generate credential provider config (e.g., "openclaw"). |
+| `--install` | Auto-install config into target's config file. |
+
+Rate-limited and audit-logged. Use for manual copy-paste or piping to tools that require stdin input.
+
+---
+
+### connect
+
+Configure AI agent integration. Auto-detects installed IDEs and generates MCP configuration.
+
+```bash
+hermetic connect              # Auto-detect agents
+hermetic connect claude-code  # Configure specific agent
+```
+
+---
+
+### doctor
+
+Run automated health checks across four categories: vault integrity, daemon status, socket connectivity, and session/integration.
+
+```bash
+hermetic doctor
+```
+
+Every failure includes a suggested fix command.
+
+---
+
+### exec (DEPRECATED)
+
+Legacy command. Use `hermetic run` instead. Will be removed in a future version.
+
+```bash
+# Old:
+hermetic exec --secret deploy-token -- ./deploy.sh
+# New:
+hermetic run --secret deploy-token --env-var DEPLOY_TOKEN -- ./deploy.sh
+```
 
 **Access pattern:** Daemon.
 
