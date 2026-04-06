@@ -11,6 +11,7 @@
   <a href="#install">Install</a> ·
   <a href="#how-it-works">How It Works</a> ·
   <a href="#mcp-proxy">MCP Proxy</a> ·
+  <a href="#openclaw-integration">OpenClaw</a> ·
   <a href="SECURITY.md">Security</a>
 </p>
 
@@ -304,6 +305,72 @@ Generates the config block for your IDE. Paste it in and every AI agent call goe
 ```
 
 The agent gets tools for brokered API calls, transient credential injection, secret listing, metadata queries, and guided secret setup — all without ever touching a credential.
+
+---
+
+## OpenClaw Integration
+
+[OpenClaw](https://github.com/openclaw) uses exec providers to resolve secrets at runtime. Hermetic is a drop-in exec provider — the fastest in the ecosystem.
+
+### Setup
+
+```bash
+# Option 1: Auto-configure (generates OpenClaw config + installs MCP server)
+hermetic reveal --configure openclaw --install
+
+# Option 2: Manual — add to your OpenClaw secrets config
+```
+
+```yaml
+# openclaw-secrets.yaml
+secrets:
+  provider: exec
+  command: hermetic reveal --secret {{name}}
+```
+
+That's it. Every `SecretRef` in your OpenClaw skills now resolves through Hermetic's encrypted vault. The agent never sees the credential value.
+
+### How It Works
+
+```
+OpenClaw Skill                 Hermetic                      API
+     │                            │                            │
+     │  SecretRef("stripe_key")   │                            │
+     │───exec provider───────────▶│                            │
+     │                            │── reveal (passphrase-gated)│
+     │◀──credential value─────────│                            │
+     │                            │                            │
+     │─────────────────── API call with credential ───────────▶│
+     │◀────────────────── response ────────────────────────────│
+```
+
+### Why Not Just Use .env?
+
+| | `.env` file | Hermetic exec provider |
+|---|---|---|
+| Storage | Plaintext on disk | AES-256-GCM encrypted vault |
+| Access control | Any process can read | Passphrase-gated, audit-logged |
+| Domain binding | None | Credential bound to allowed domains |
+| Rotation | Manual find-and-replace | `hermetic add` replaces in vault |
+| Agent visibility | Agent reads .env directly | Agent gets value only through exec provider |
+| Multi-project | Copy .env per project | Single vault, all projects |
+
+### MCP Server (Alternative to Exec Provider)
+
+For the full ★★★ Brokered experience where the credential never leaves daemon memory:
+
+```json
+{
+  "mcpServers": {
+    "hermetic": {
+      "command": "hermetic",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+With MCP, OpenClaw skills can use `hermetic_authenticated_request` instead of reading the credential — the daemon makes the HTTP call directly. The credential never enters the skill's process.
 
 ---
 
