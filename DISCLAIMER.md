@@ -12,21 +12,21 @@ or the use or other dealings in the software.
 ## Pre-Production Status
 
 This software has not undergone an independent security audit by a third-party
-firm. While the codebase has been verified through a comprehensive automated test suite,
-multiple red team campaigns, and constitutional amendments under the HAIG governance
+firm. While the codebase has been verified through 889 automated tests,
+7 red team campaigns, and 69 constitutional amendments under the HAIG governance
 framework, it has zero production deployments at the time of initial release.
 
 ## Known Limitations
 
 Hermetic publishes all known limitations openly. See the
-[Known Limitations](README.md#scope) section of the README for
+[Known Limitations](README.md#known-limitations) section of the README for
 the complete list, including:
 
-- Same-UID processes have full daemon access
-- Pre-production software (zero production deployments)
-- No independent third-party security audit
-- Linux-only
-- Containers require CAP_IPC_LOCK
+- **V1-LIM-1** (CRITICAL): Same-UID processes have full daemon access
+- **V1-LIM-2** (HIGH): Zero production deployments
+- **V1-LIM-3** (HIGH): No independent human security audit
+- **V1-LIM-4** (MEDIUM): Linux-only
+- **V1-LIM-5** (MEDIUM): Container requires CAP_IPC_LOCK
 
 ## Credential Risk
 

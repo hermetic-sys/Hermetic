@@ -33,7 +33,7 @@ Set this config on your fork before your first commit.
 
 ### The Easiest Contribution: Service Templates
 
-Hermetic ships built-in service templates. Adding a new template is a 7-line JSON addition — no Rust code, no security review, no daemon changes:
+Hermetic ships 19 built-in service templates (Anthropic, OpenAI, Stripe, GitHub, etc.). Adding a new template is a 7-line JSON addition — no Rust code, no security review, no daemon changes:
 
 ```json
 {
@@ -47,7 +47,7 @@ Hermetic ships built-in service templates. Adding a new template is a 7-line JSO
 }
 ```
 
-Submit your template as a PR — template contributions are integrated by maintainers into the binary build. Run the tests and open a PR. This is the fastest path from "I want to contribute" to "merged."
+Add it to the template registry in `crates/hermetic/src/templates.json`, run the tests, and open a PR. This is the fastest path from "I want to contribute" to "merged."
 
 ### Bug Reports
 
@@ -69,12 +69,13 @@ Open an issue on GitHub with:
 4. Make your changes
 5. Run the full gate:
    ```bash
-   cargo build -p hermetic-core -p hermetic-transport -p hermetic-sdk
-   cargo test -p hermetic-core -p hermetic-transport -p hermetic-sdk
-   cargo clippy -p hermetic-core -p hermetic-transport -p hermetic-sdk -- -D warnings
+   cargo build --workspace
+   cargo test --workspace
+   cargo clippy --workspace -- -D warnings
    cargo deny check licenses
    ```
-6. Open a pull request against `main`
+6. Verify frozen hashes if you touched security-critical files: `sha256sum --check FROZEN_HASHES.sha256`
+7. Open a pull request against `main`
 
 All PRs require CI to pass (build, test, clippy, deny) before merge. Branch protection is enforced — no force pushes to `main`, no merge without CI green.
 
@@ -117,10 +118,10 @@ The maintainer reviews proposals and decides on ratification. Ratified amendment
 
 **Build gates (enforced in CI — your PR will not merge if any fails):**
 
-- `cargo clippy -p hermetic-core -p hermetic-transport -p hermetic-sdk -- -D warnings` — zero warnings
-- `cargo test -p hermetic-core -p hermetic-transport -p hermetic-sdk` — all tests pass
+- `cargo clippy --workspace -- -D warnings` — zero warnings
+- `cargo test --workspace` — all 710+ tests pass
 - `cargo deny check licenses` — all dependencies AGPL-compatible
-- `RUSTFLAGS='-D warnings' cargo build -p hermetic-core -p hermetic-transport -p hermetic-sdk` — zero compiler warnings
+- `RUSTFLAGS='-D warnings' cargo build --workspace` — zero compiler warnings
 
 **Code rules:**
 
@@ -128,7 +129,7 @@ The maintainer reviews proposals and decides on ratification. Ratified amendment
 - `hermetic-core` and `hermetic-transport` enforce `#![forbid(unsafe_code)]` at the crate level. No exceptions.
 - All other production crates enforce `#![deny(unsafe_code)]`. Any use of `unsafe` requires a documented justification in the PR description explaining why safe alternatives are insufficient, what invariants the unsafe block maintains, and how it is tested.
 - Secret-handling code must use `Zeroizing<Vec<u8>>` wrappers. Raw `Vec<u8>` for secret material will be rejected in review.
-- No `println!` or `print!` in `hermetic-mcp` — stdout is the JSON-RPC wire. All diagnostics go through `ui::` on stderr.
+- No `println!` or `print!` in `hermetic-mcp` — stdout is the JSON-RPC wire (MCP-5). All diagnostics go through `ui::` on stderr.
 
 ## Review Process
 

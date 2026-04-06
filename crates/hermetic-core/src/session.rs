@@ -16,7 +16,7 @@
 //
 // Commercial licenses available at https://hermeticsys.com/license
 
-//! Hermetic Session Persistence 
+//! Hermetic Session Persistence (HM-EXEC-UX-002-R2 Chunk 5)
 //!
 //! Saves an encrypted passphrase to disk for daemon restart recovery.
 //! Session key is derived at runtime — NO key material stored in session file.

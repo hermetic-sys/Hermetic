@@ -170,16 +170,6 @@ fn bold() -> &'static str {
     }
 }
 
-/// ANSI dim.
-#[allow(dead_code)]
-fn dim() -> &'static str {
-    if color_enabled() {
-        "\x1b[2m"
-    } else {
-        ""
-    }
-}
-
 /// ANSI reset.
 fn reset() -> &'static str {
     if color_enabled() {

@@ -33,10 +33,10 @@ use crate::error::VaultError;
 const MIN_PASSPHRASE_LENGTH: usize = 12;
 
 /// Argon2id parameters (v1.3.0a locked, authoritative).
-/// Memory-hard parameters, 32-byte output.
+/// m=256MB, t=4, p=2, output=32B.
 /// p_cost=2 is intentional: lower parallelism increases memory-hardness per
 /// thread, making the KDF harder to parallelize on GPUs. This value is the
-/// code-authoritative reference.
+/// code-authoritative reference. See HM-CERT-SUPERNOVA-V1-001 §7.
 const ARGON2_M_COST: u32 = 262144; // 256 MB
 const ARGON2_T_COST: u32 = 4;
 const ARGON2_P_COST: u32 = 2;

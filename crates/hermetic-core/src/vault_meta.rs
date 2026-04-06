@@ -61,7 +61,7 @@ pub struct VaultMeta {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub audit_chain_anchor: Option<String>,
 
-    /// Secret name tagged as the reveal key.
+    /// Secret name tagged as the reveal key (HM-EXEC-REVEAL-001).
     /// At most one secret at a time. None = no reveal key configured.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reveal_key_name: Option<String>,
@@ -199,7 +199,7 @@ mod tests {
         assert_eq!(err.fail_closed_action(), FailClosedAction::Seal);
     }
 
-    /// reveal_key_name roundtrip + skip_serializing_if.
+    /// HM-EXEC-REVEAL-001: reveal_key_name roundtrip + skip_serializing_if.
     #[test]
     fn reveal_key_name_roundtrip() {
         let mut meta = VaultMeta::new_software(&[0u8; 32], &[0u8; 32], 262144, 4, 2);
@@ -215,7 +215,7 @@ mod tests {
         assert_eq!(restored.reveal_key_name.as_deref(), Some("my-api-key"));
     }
 
-    /// Backward compat — old JSON without reveal_key_name deserializes fine.
+    /// HM-EXEC-REVEAL-001: Backward compat — old JSON without reveal_key_name deserializes fine.
     #[test]
     fn reveal_key_name_backward_compat() {
         // Simulate a V4 JSON without reveal_key_name

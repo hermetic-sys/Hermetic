@@ -886,12 +886,12 @@ impl Vault {
         self.meta.audit_chain_anchor.as_deref()
     }
 
-    /// Get the reveal key name from vault metadata.
+    /// HM-EXEC-REVEAL-001: Get the reveal key name from vault metadata.
     pub fn get_reveal_key_name(&self) -> Option<&str> {
         self.meta.reveal_key_name.as_deref()
     }
 
-    /// Set or clear the reveal key name in vault metadata.
+    /// HM-EXEC-REVEAL-001: Set or clear the reveal key name in vault metadata.
     /// Persists to database AND updates in-memory meta immediately.
     #[cfg(not(target_os = "windows"))]
     pub fn set_reveal_key_name(&mut self, name: Option<&str>) -> Result<(), VaultError> {
@@ -902,7 +902,7 @@ impl Vault {
         Ok(())
     }
 
-    /// Verify passphrase inline (Argon2id re-derivation).
+    /// HM-EXEC-REVEAL-001: Verify passphrase inline (Argon2id re-derivation).
     /// Used for passphrase-gated reveal operations (set/clear/remove-tagged).
     #[cfg(not(target_os = "windows"))]
     pub fn verify_passphrase(&self, passphrase: &[u8]) -> Result<(), VaultError> {
@@ -923,7 +923,7 @@ impl Vault {
         )
     }
 
-    /// R-15: Public audit entry writer for daemon dispatch.
+    /// HM-EXEC-REVEAL-001 R-15: Public audit entry writer for daemon dispatch.
     /// Fail-closed: AuditFailure → SEAL. Must be called BEFORE returning secret value.
     #[cfg(not(target_os = "windows"))]
     pub fn write_audit_entry_public(&self, action: &str, secret_name: Option<&str>) -> Result<(), VaultError> {
