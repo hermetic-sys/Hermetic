@@ -5,7 +5,12 @@ This guide walks you from zero to your first agent-authenticated API request. By
 **Time required:** 5–10 minutes (you'll see a progress indicator during key derivation).
 
 **Prerequisites:**
-- Linux x86_64 (Ubuntu 24.04 LTS tested; Debian, Fedora, Arch, or any modern distro). Architecture depends on Unix domain sockets, SO_PEERCRED, and /proc — no macOS or Windows support in V1.
+- Linux x86_64 (Ubuntu 24.04 LTS tested; Debian, Fedora, Arch, or any modern distro). No macOS or Windows support in V1.
+- **Memory lock permission** — Hermetic locks secrets in RAM. Run `ulimit -l` — if it's not `unlimited`, fix it:
+  ```bash
+  echo "* - memlock unlimited" | sudo tee -a /etc/security/limits.conf
+  # Log out and back in, or: ulimit -l unlimited
+  ```
 
 ---
 

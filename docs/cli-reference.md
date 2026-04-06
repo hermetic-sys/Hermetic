@@ -160,7 +160,13 @@ hermetic start                           # Standard: prompt for passphrase
 hermetic start --remember-session        # Save encrypted session for reboot recovery
 ```
 
-Applies OS hardening (mlockall, privilege restriction, ptrace protection) before accepting connections. Writes PID file to `~/.hermetic/<env>/daemon.pid`.
+Applies OS hardening (memory locking, privilege restriction, ptrace protection) before accepting connections. Writes PID file to `~/.hermetic/<env>/daemon.pid`.
+
+**If startup fails with "mlockall failed":** Your system's memory lock limit is too low. Fix with:
+```bash
+echo "* - memlock unlimited" | sudo tee -a /etc/security/limits.conf
+# Log out and back in, or: ulimit -l unlimited
+```
 
 The `--remember-session` flag encrypts the passphrase (not the master key) with a session key derived from `install_secret + machine_id + boot_id + hostname + UID`. Session expires after 7 days. Destroyed on `hermetic stop` or `hermetic seal`.
 

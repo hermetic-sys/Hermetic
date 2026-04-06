@@ -76,6 +76,21 @@ curl -sSf https://hermeticsys.com/install.sh | sh
 
 Single static binary (Rust, no runtime dependencies). No Docker. No cloud account. No telemetry.
 
+### Requirements
+
+- **Linux x86_64** (macOS and Windows support planned)
+- **Memory lock permission** — Hermetic locks secrets in RAM to prevent swapping to disk. Most systems need:
+  ```bash
+  # Check current limit
+  ulimit -l
+
+  # If it shows 64 or similar (not "unlimited"), fix it:
+  echo "* - memlock unlimited" | sudo tee -a /etc/security/limits.conf
+  # Then log out and back in, or run:
+  ulimit -l unlimited
+  ```
+  Without this, `hermetic start` will fail with "mlockall failed." This is a one-time setup.
+
 ---
 
 <a name="how-it-works"></a>
