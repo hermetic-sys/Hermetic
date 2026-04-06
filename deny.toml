@@ -1,9 +1,3 @@
-[advisories]
-vulnerability = "deny"
-unmaintained = "workspace"
-yanked = "workspace"
-notice = "workspace"
-
 [licenses]
 unlicensed = "deny"
 allow = [
