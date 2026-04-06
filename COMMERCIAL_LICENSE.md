@@ -1,158 +1,73 @@
-# Hermetic Commercial License
+# Commercial License
 
-> **This document is a summary of commercial license terms, not the license itself.** The binding commercial license agreement is provided upon purchase. This summary is for evaluation purposes. If you have questions, email [license@hermeticsys.com](mailto:license@hermeticsys.com).
+## Open-Source Core
 
----
+The cryptographic core of Hermetic (hermetic-core, hermetic-transport, hermetic-sdk) is licensed under the [GNU Affero General Public License v3.0 or later](LICENSE) (AGPL-3.0-or-later).
 
-## When Do You Need a Commercial License?
+Under the AGPL, you may freely use, modify, and distribute these crates, provided that any network-facing service using modified versions makes the complete source code available to users.
 
-Hermetic is licensed under the [GNU Affero General Public License v3](LICENSE) (AGPL-3.0-or-later). You can use it freely under the AGPL. A commercial license is needed if:
+## Commercial Licensing
 
-- **You modify Hermetic and deploy it as a network service** and do not want to publish your source code (the AGPL network clause requires this).
-- **Your organization's policy prohibits AGPL software** in production systems.
-- **You need more than 1 environment or more than 7 days of audit retention** — these are Community Edition limits. Individual, Startup, and Enterprise tiers expand these.
-- **You need priority CVE notifications, signed binary builds, SLA guarantees, or indemnification.**
+For organizations that cannot comply with the AGPL's requirements (e.g., proprietary SaaS products, embedded systems, or internal tools where source disclosure is not feasible), commercial licenses are available.
 
-If none of these apply, the Community Edition is free forever with no registration required.
+**Contact**: [license@hermeticsys.com](mailto:license@hermeticsys.com)
 
----
+## Pre-Built Binary
 
-## What the Commercial License Grants
+The Hermetic binary (including the daemon, MCP bridge, proxy, and CLI) is distributed as a compiled binary. It includes both AGPL-licensed components and proprietary components.
 
-A commercial license grants the licensee:
+### Community Edition (Free)
 
-1. **AGPL obligation waiver.** You may use, modify, and deploy Hermetic without publishing source code or providing AGPL-mandated notices to network users. The waiver applies to the version purchased and all minor/patch releases within that major version.
+- Complete security model — every security feature included
+- 10 secrets, 1 environment
+- Service templates for common APIs
+- No registration, no telemetry, no cloud
 
-2. **Expanded operational limits.** The Community Edition limits (CL-1, CL-2, CL-3) are lifted or expanded according to your tier.
+### Pro Edition ($10/month or $99/year)
 
-3. **License key.** An offline HMAC-SHA256 license key file (`license.key`) that unlocks your tier's limits. No phone-home, no activation server, no telemetry.
+Everything in Community, plus:
 
----
+- Unlimited secrets and environments
+- Expanded service template library
+- OAuth2 automatic token refresh
+- Credential health monitoring
+- TUI and web dashboards
+- Token usage analytics
+- Extended audit log retention
+- Priority support
 
-## Tiers
+### Enterprise Edition (Custom Pricing)
 
-| | Community | Individual | Startup | Enterprise |
-|---|---|---|---|---|
-| **Price** | Free forever | $9.99/month | $499/year | Custom — [contact us](mailto:license@hermeticsys.com) |
-| **License** | AGPL-3.0-or-later | Commercial (AGPL waived) | Commercial (AGPL waived) | Commercial + SLA |
-| **Secrets** | Unlimited | Unlimited | Unlimited | Unlimited |
-| **Named environments** | 1 (`default`) | 2 | 5 | Unlimited |
-| **Audit log retention** | 7 days | 14 days | 30 days | Unlimited |
-| **Priority CVE notifications** | — | — | ✓ | ✓ |
-| **Signed binary builds** | — | — | ✓ | ✓ |
-| **Multi-user RBAC** | — | — | — | ✓ (V2) |
-| **HSM/TPM integration** | — | — | — | ✓ (V2) |
-| **Named audit reports + SOC 2 evidence** | — | — | — | ✓ |
-| **Custom SLA + indemnification** | — | — | — | ✓ |
-| **Support** | Community (GitHub Issues) | Email (best-effort) | Email (48h response) | Dedicated (SLA-bound) |
+Everything in Pro, plus:
 
----
+- Custom integrations
+- Dedicated support
+- Volume licensing
+- Custom audit retention
 
-## Security Is Never Gated
+**Contact**: [license@hermeticsys.com](mailto:license@hermeticsys.com)
 
-All security features are identical across all tiers. The following are universal and cannot be removed, downgraded, or gated behind a commercial license:
+## Security Commitment
 
-- Vault encryption (Argon2id KDF, AES-256-GCM per-secret, SQLCipher page-level)
-- Handle protocol (256-bit CSPRNG, single-use, UID-bound, domain-bound, version-fingerprinted)
-- SSRF protection (22 blocked IP ranges, DNS pinning, per-hop redirect re-validation)
-- OS hardening (mlockall, PR_SET_DUMPABLE, privilege restriction — all FATAL)
-- MCP bridge (5 tools, stdout purity, no secrets in responses)
-- Python SDK (PyO3, 16 escape-hatch blocks)
-- All 41 constitutional amendments (HC-*, MCP-*, CC-*, SM-*, CL-*)
-- HMAC-SHA256 tamper-evident audit chain (retention period varies by tier; chain integrity is universal)
-- Session persistence (encrypted reboot recovery)
-- Terminal output sanitization (HC-11)
+Security features are never gated behind a license tier. The encryption, attestation, handle protocol, SSRF protection, and all security mechanisms are identical across Community and Pro editions. The only differences are operational limits (secret count, environment count) and convenience features (dashboards, analytics, OAuth2 refresh).
 
-This is a foundational commitment: no security property will ever be used as a commercial differentiator.
+## Dual-License FAQ
 
----
+**Q: Can I use the AGPL crates in my open-source project?**
+A: Yes, as long as your project is also AGPL-compatible and you provide source code to users.
 
-## Community Edition Limits (CL Amendments)
+**Q: Can I use the AGPL crates in my proprietary product?**
+A: You need a commercial license. Contact license@hermeticsys.com.
 
-The Community Edition enforces three limits via constitutional amendments. These limits are designed to be natural upgrade triggers for teams, not punishments for individuals.
+**Q: Can I use the pre-built binary in my CI/CD pipeline?**
+A: Yes. The binary is free for Community use. No license key required.
 
-**CL-1: Single named environment.** Only the `default` environment is available. Attempting to create or use a non-default environment returns an error. Enforced at daemon startup.
+**Q: Does the AGPL apply to my code if I just use the binary?**
+A: No. The AGPL applies to modifications of the AGPL-licensed source code. Using the binary as a tool does not create a derivative work.
 
-**CL-2: 7-day audit log retention.** Audit entries older than 7 days are pruned on daemon startup and every 24 hours during operation. The HMAC-SHA256 chain remains intact over the retained window.
-
-**CL-3: Community Edition banner.** A non-intrusive banner is displayed on daemon stderr and in the MCP `initialize` response identifying the Community Edition. This does not affect functionality.
-
-### Fail-Open Behavior
-
-All tier limits fail open:
-
-- A corrupt or missing `license.key` file defaults to Community Edition behavior.
-- A limit check failure (e.g., creating a second named environment in Community) returns a clear error message — it never causes a crash, data loss, or vault corruption.
-- An expired license key reverts to Community limits. Existing secrets remain accessible; existing environments remain readable. You lose the expanded limits, not your data.
-
-This is intentional. The AGPL is the real enforcement mechanism, not DRM.
+**Q: What if my company prohibits AGPL dependencies?**
+A: Contact us for a commercial license that replaces the AGPL terms with a standard proprietary license.
 
 ---
 
-## License Key
-
-The commercial license is delivered as an offline `license.key` file using HMAC-SHA256. Place it at `~/.hermetic/license.key`.
-
-- No internet connection required for validation.
-- No telemetry, phone-home, or activation server.
-- No expiry check against an external clock (the key contains its own expiry date, verified locally).
-- The license key mechanism is intentionally transparent: the validation logic is in the open-source codebase. We rely on the AGPL for enforcement, not on obfuscation.
-
----
-
-## What You Are Purchasing
-
-When you purchase a commercial license, you receive:
-
-1. A signed commercial license agreement (PDF) granting AGPL obligation waiver for the specified tier and term.
-2. A `license.key` file for offline tier activation.
-3. Access to the support channel corresponding to your tier.
-4. (Enterprise only) A named point of contact and SLA agreement.
-
-The license is per-organization, not per-machine. You may deploy Hermetic on as many machines as needed within your organization.
-
----
-
-## FAQ
-
-**Can I evaluate Hermetic commercially before purchasing?**
-Yes. The Community Edition is fully functional for evaluation. Secrets are unlimited; the only limits are 1 environment and 7-day audit retention. No time limit on evaluation.
-
-**What happens if I let my license expire?**
-Hermetic reverts to Community Edition limits. Your vault, secrets, and audit log remain intact. You can renew at any time to restore expanded limits.
-
-**Can I use the Community Edition in production?**
-Yes, under the AGPL. If you modify Hermetic and deploy it as a network service, you must publish your source code. If you use it unmodified, the AGPL requires that you make the source available to users who interact with it over a network.
-
-**Does the commercial license cover my entire organization?**
-The Individual license is per-person. Startup and Enterprise licenses are per-organization — all employees, contractors, and CI/CD systems within the licensed organization are covered.
-
-**Can I redistribute Hermetic with my product?**
-Under the AGPL, yes — with full source disclosure. Under a commercial license, yes — without source disclosure, subject to the terms of your license agreement. If you need to embed or redistribute Hermetic, email [license@hermeticsys.com](mailto:license@hermeticsys.com) to discuss OEM terms.
-
-**Is there a free tier for open-source projects?**
-The Community Edition is already AGPL and free forever. Open-source projects can use it without restriction. If your open-source project needs multiple environments or extended audit retention, contact us — we offer free Individual or Startup licenses for qualifying OSS projects.
-
----
-
-## Purchase
-
-**Individual ($9.99/month):** Email [license@hermeticsys.com](mailto:license@hermeticsys.com). Payment via PayPal or any credit/debit card. License key delivered within 24 hours.
-
-**Startup ($499/year):** Email [license@hermeticsys.com](mailto:license@hermeticsys.com) with your organization name. Payment via PayPal or any credit/debit card. License key delivered within 24 hours.
-
-**Enterprise (custom):** Email [license@hermeticsys.com](mailto:license@hermeticsys.com) with your requirements. We will schedule a technical call to discuss your deployment, support needs, and SLA requirements.
-
----
-
-> **DRAFT — PENDING LEGAL REVIEW**
->
-> This document describes intended commercial terms. The binding license agreement will be reviewed by legal counsel before any commercial license is sold. Terms may change. This notice will be removed when the final version is published.
->
-> Questions: [license@hermeticsys.com](mailto:license@hermeticsys.com)
-
----
-
-<p align="center">
-<a href="https://hermeticsys.com">hermeticsys.com</a> · AGPL-3.0-or-later
-</p>
+The Hermetic Project · [hermeticsys.com](https://hermeticsys.com) · AGPL-3.0-or-later

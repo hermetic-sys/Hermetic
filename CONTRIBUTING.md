@@ -1,155 +1,118 @@
 # Contributing to Hermetic
 
-Thank you for your interest in contributing to Hermetic. This document explains how to contribute and what to expect.
+Thank you for your interest in contributing to Hermetic. This document covers the process, requirements, and conventions.
 
-## Contributor License Agreement (CLA)
+## Before You Start
 
-All contributors must sign the Individual CLA before their first pull request can be merged. This is enforced automatically — when you open a PR, [CLA Assistant](https://cla-assistant.io/) will comment with a link to sign electronically via GitHub. One click, 30 seconds.
+1. **Check existing issues** for duplicates or related discussions
+2. **Read the security model** — changes that weaken security properties will not be accepted
+3. **Open an issue first** for non-trivial changes to discuss the approach
 
-If you're contributing on behalf of your employer, your organization needs to execute the Corporate CLA. Email [license@hermeticsys.com](mailto:license@hermeticsys.com) with your organization name and the GitHub usernames of authorized contributors.
+## Contributor License Agreement
 
-The full text of both agreements is published for review: [Individual CLA](docs/legal/ICLA.md) · [Corporate CLA](docs/legal/CCLA.md). The ICLA is signed through CLA Assistant's GitHub integration. The CCLA is signed via email to license@hermeticsys.com.
+All contributions require a signed Contributor License Agreement (CLA). This ensures we can maintain the dual-license model (AGPL-3.0 + commercial). You will be prompted to sign when you open your first pull request.
 
-**Why a CLA?** Hermetic uses AGPL-3.0-or-later with a commercial license option. The CLA ensures the project can continue to offer both open-source and commercial licenses. Without it, external contributions could create copyright ambiguities that block future licensing decisions.
+- **Individual CLA**: For personal contributions
+- **Corporate CLA**: For contributions made on behalf of your employer
 
-## License
+## What You Can Contribute
 
-By contributing, you agree that your contributions will be licensed under the [GNU Affero General Public License v3](LICENSE) (AGPL-3.0-or-later).
+This repository contains the open-source cryptographic core:
 
-## Commit Identity
+| Crate | What It Does | Contribution Areas |
+|---|---|---|
+| hermetic-core | Vault encryption, KDF, audit chain | Crypto improvements, test coverage, bug fixes |
+| hermetic-transport | HTTP executor, SSRF defense | Transport hardening, auth schemes, SSRF range updates |
+| hermetic-sdk | Python SDK (PyO3) | Python API improvements, documentation |
 
-All commits to this project use the project identity:
+## Development Setup
 
+```bash
+# Clone
+git clone https://github.com/hermetic-sys/hermetic.git
+cd hermetic
+
+# Build
+cargo build
+
+# Test
+cargo test --workspace
+
+# Lint
+cargo clippy --workspace -- -D warnings
 ```
+
+## Code Conventions
+
+### Git Identity
+
+All commits must use the project identity:
+
+```bash
 git config user.name "The Hermetic Project"
 git config user.email "dev@hermeticsys.com"
 ```
 
-**No personal names in tracked files.** No personal names in commit messages, no `Co-Authored-By` headers. This is project policy and applies to all contributors. Your contribution is credited through the CLA and GitHub's PR history, not through commit metadata.
+**Anonymity discipline**: No personal names in commits, code comments, or documentation. No `Co-Authored-By` headers. This is a strict project requirement.
 
-Set this config on your fork before your first commit.
+### Rust Style
 
-## How to Contribute
+- `cargo clippy -- -D warnings` must pass with zero warnings
+- `cargo test --workspace` must pass with zero failures
+- No `unwrap()` or `expect()` on security-critical paths
+- No `String` or `&str` for secret material — use `Zeroizing<Vec<u8>>`
+- No `Display`, `Debug`, or `Clone` on types holding key material
+- Error messages must not contain secret bytes
 
-### The Easiest Contribution: Service Templates
+### Security Rules
 
-Hermetic ships 19 built-in service templates (Anthropic, OpenAI, Stripe, GitHub, etc.). Adding a new template is a 7-line JSON addition — no Rust code, no security review, no daemon changes:
+Every security property in Hermetic is encoded as a formal binding rule. If your change affects a security property, note it in your PR description. Key rules for contributors:
 
-```json
-{
-  "id": "your-service",
-  "display_name": "Your Service",
-  "allowed_domains": ["api.yourservice.com"],
-  "auth_scheme": "bearer",
-  "default_secret_name": "your_service_key",
-  "test_url": "https://api.yourservice.com/v1/health",
-  "hint": "https://yourservice.com/settings/api-keys"
-}
-```
+| Rule | Description |
+|---|---|
+| Zeroize before yield | Secrets must be zeroized before any .await point |
+| Indistinguishable denial | All error responses to clients must be identical (same body, same timing) |
+| No secrets in errors | Secret bytes must never appear in error messages, log entries, or display output |
+| Remove before validate | Handles are removed from the map before validation (prevents timing side channels) |
 
-Add it to the template registry in `crates/hermetic/src/templates.json`, run the tests, and open a PR. This is the fastest path from "I want to contribute" to "merged."
+### Test Requirements
 
-### Bug Reports
+- Every new function needs at least one test
+- Security-critical functions need adversarial tests (malformed input, boundary conditions)
+- Tests must not print secret material to stdout/stderr
 
-Open an issue on GitHub with:
-
-- Hermetic version (`hermetic version`)
-- Operating system and kernel version (`uname -a`)
-- Steps to reproduce
-- Expected vs. actual behavior
-- Output of `hermetic doctor` (if relevant)
-
-**Security vulnerabilities:** Do NOT open a public issue. See [SECURITY.md](SECURITY.md) for responsible disclosure.
-
-### Code Contributions
+## Pull Request Process
 
 1. Fork the repository
-2. Configure commit identity (see above)
-3. Create a feature branch from `main`
-4. Make your changes
-5. Run the full gate:
-   ```bash
-   cargo build --workspace
-   cargo test --workspace
-   cargo clippy --workspace -- -D warnings
-   cargo deny check licenses
-   ```
-6. Verify frozen hashes if you touched security-critical files: `sha256sum --check FROZEN_HASHES.sha256`
-7. Open a pull request against `main`
-
-All PRs require CI to pass (build, test, clippy, deny) before merge. Branch protection is enforced — no force pushes to `main`, no merge without CI green.
-
-### What We're Looking For
-
-- Bug fixes with test coverage
-- New service templates (see above — the lowest-friction contribution)
-- Documentation improvements and typo fixes
-- Fuzz target additions (new targets for under-covered code paths)
-- Performance improvements backed by benchmarks
-- Platform investigation (macOS, BSDs — V1 is Linux-only but we want to understand what's required)
-
-### What Requires Discussion First
-
-Open an issue to discuss **before** writing code for:
-
-- New MCP tools or changes to existing tool schemas
-- Changes to the wire protocol (length-prefixed framing, JSON-RPC handling)
-- Any cryptographic changes (KDF parameters, encryption schemes, HKDF info strings)
-- New external dependencies (we aim for minimal dependency surface)
-- Changes to OS hardening behavior (mlockall, privilege restriction, ptrace)
-- Constitutional amendment proposals (see below)
-
-These areas affect security invariants that are governed by constitutional amendments. Changes require architectural review and may need formal amendment ratification before implementation.
-
-### Constitutional Amendment Proposals
-
-Hermetic's security decisions are formalized as constitutional amendments (HC-*, MCP-*, CC-*, SM-*, etc.) with binding language and code-level enforcement. The full registry is in [`docs/`](docs/).
-
-If you identify a security gap or want to propose a new security invariant, you can propose a constitutional amendment by opening an issue with:
-
-- The threat or gap the amendment addresses
-- Proposed binding language (what must be true)
-- Enforcement point (which code enforces it)
-- How to verify compliance (test or gate check)
-
-The maintainer reviews proposals and decides on ratification. Ratified amendments become binding on all future code changes.
-
-## Code Standards
-
-**Build gates (enforced in CI — your PR will not merge if any fails):**
-
-- `cargo clippy --workspace -- -D warnings` — zero warnings
-- `cargo test --workspace` — all 710+ tests pass
-- `cargo deny check licenses` — all dependencies AGPL-compatible
-- `RUSTFLAGS='-D warnings' cargo build --workspace` — zero compiler warnings
-
-**Code rules:**
-
-- All new code must have tests. Security-critical code must have fuzz targets.
-- `hermetic-core` and `hermetic-transport` enforce `#![forbid(unsafe_code)]` at the crate level. No exceptions.
-- All other production crates enforce `#![deny(unsafe_code)]`. Any use of `unsafe` requires a documented justification in the PR description explaining why safe alternatives are insufficient, what invariants the unsafe block maintains, and how it is tested.
-- Secret-handling code must use `Zeroizing<Vec<u8>>` wrappers. Raw `Vec<u8>` for secret material will be rejected in review.
-- No `println!` or `print!` in `hermetic-mcp` — stdout is the JSON-RPC wire (MCP-5). All diagnostics go through `ui::` on stderr.
+2. Create a feature branch from `main`
+3. Make your changes with clear, descriptive commits
+4. Ensure all checks pass: `cargo test && cargo clippy -- -D warnings`
+5. Open a PR with a description that includes:
+   - What changed and why
+   - Which security properties are affected (if any)
+   - Test evidence
 
 ## Review Process
 
-Pull requests are reviewed by the project maintainer. Expect a response within 7 days for straightforward changes (templates, docs, bug fixes). Changes touching security-critical paths (daemon, transport, core, MCP) may take longer and will receive more thorough review.
+All PRs are reviewed for:
 
-Review priorities: correctness first, then security invariant preservation, then style. We will not block a good bug fix over formatting preferences.
+1. **Correctness** — does it do what it claims?
+2. **Security** — does it weaken any security property?
+3. **Test coverage** — is the change tested?
+4. **Anonymity** — no personal names leaked?
 
-## Governance
+## Reporting Security Issues
 
-Hermetic is governed by the **HAIG Framework** (Human-AI Integrated Governance). The Constitutional Authority (human maintainer) has final decision on all architectural and security matters. This is a benevolent-dictator model with formal process: every security decision is traceable to an amendment, every implementation is gated, and every claim is backed by evidence.
-
-See the [governance documentation](docs/) and [amendment registry](docs/) for the full framework.
+See [SECURITY.md](SECURITY.md). Do NOT open public issues for security vulnerabilities.
 
 ## Code of Conduct
 
-This project follows the [Contributor Covenant 2.1](CODE_OF_CONDUCT.md). Be respectful, constructive, and professional.
+See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
-## Questions?
+## License
 
-- General questions: Open a GitHub Discussion
-- Security issues: [security@hermeticsys.com](mailto:security@hermeticsys.com)
-- Licensing and CLA: [license@hermeticsys.com](mailto:license@hermeticsys.com)
-- Everything else: [dev@hermeticsys.com](mailto:dev@hermeticsys.com)
+By contributing, you agree that your contributions will be licensed under AGPL-3.0-or-later, and that the project maintainers may offer your contributions under commercial licenses to third parties.
+
+---
+
+The Hermetic Project · [hermeticsys.com](https://hermeticsys.com) · AGPL-3.0-or-later

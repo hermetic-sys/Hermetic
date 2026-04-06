@@ -3,13 +3,13 @@
 # https://hermeticsys.com
 #
 # Usage: curl -fsSL https://hermeticsys.com/install.sh | sh
-#    or: curl -fsSL https://raw.githubusercontent.com/hermetic-sys/hermetic/main/scripts/install.sh | sh
+#    or: curl -fsSL https://raw.githubusercontent.com/hermetic-sys/Hermetic/main/scripts/install.sh | sh
 #
 # Respects: HERMETIC_INSTALL_DIR (default: /usr/local/bin or ~/.local/bin)
 
 set -e
 
-REPO="hermetic-sys/hermetic"
+REPO="hermetic-sys/Hermetic"
 BINARY="hermetic"
 
 # ── Parse flags ──
@@ -140,7 +140,7 @@ if [ "$VERIFY" = true ]; then
     curl -sSL -o "${TMPDIR}/hermetic.tar.gz.asc" \
       "${RELEASE_URL}.asc" 2>/dev/null || true
     curl -sSL -o "${TMPDIR}/SIGNING_KEY.pub" \
-      "https://raw.githubusercontent.com/hermetic-sys/hermetic/main/SIGNING_KEY.pub" 2>/dev/null || true
+      "https://raw.githubusercontent.com/hermetic-sys/Hermetic/main/SIGNING_KEY.pub" 2>/dev/null || true
 
     if [ -f "${TMPDIR}/hermetic.tar.gz.asc" ] && [ -f "${TMPDIR}/SIGNING_KEY.pub" ]; then
       gpg --batch --import "${TMPDIR}/SIGNING_KEY.pub" 2>/dev/null
@@ -184,8 +184,8 @@ printf "${NC}"
 echo ""
 echo "  Quick start:"
 echo "    hermetic init --quickstart     # One-command setup"
-echo "    hermetic scan .                # Find exposed API keys"
-echo "    hermetic add --wizard --batch  # Add multiple keys at once"
+echo "    hermetic add --wizard          # Add API keys interactively"
+echo "    hermetic connect               # Configure your AI agents"
 echo ""
 echo "  agent-isolated credential broker"
 echo ""

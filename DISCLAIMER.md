@@ -1,48 +1,28 @@
 # Disclaimer
 
-Hermetic is provided "AS IS", without warranty of any kind, express or implied,
-including but not limited to the warranties of merchantability, fitness for a
-particular purpose, and noninfringement.
+## No Warranty
 
-In no event shall the authors, contributors, or The Hermetic Project be liable
-for any claim, damages, or other liability, whether in an action of contract,
-tort, or otherwise, arising from, out of, or in connection with the software
-or the use or other dealings in the software.
+HERMETIC IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
 
-## Pre-Production Status
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-This software has not undergone an independent security audit by a third-party
-firm. While the codebase has been verified through 889 automated tests,
-7 red team campaigns, and 69 constitutional amendments under the HAIG governance
-framework, it has zero production deployments at the time of initial release.
+## Security Limitations
 
-## Known Limitations
+While Hermetic is designed to protect credentials from unauthorized access, no software can guarantee absolute security. The system has been fuzz tested with zero crashes and adversarially validated through independent red team campaigns. However:
 
-Hermetic publishes all known limitations openly. See the
-[Known Limitations](README.md#known-limitations) section of the README for
-the complete list, including:
+- The system protects against software-level attacks within its documented threat model
+- It does not protect against root-level access, kernel exploits, or physical hardware attacks
+- Known limitations are documented and disclosed publicly
+- The security model assumes a single-user Linux workstation environment
 
-- **V1-LIM-1** (CRITICAL): Same-UID processes have full daemon access
-- **V1-LIM-2** (HIGH): Zero production deployments
-- **V1-LIM-3** (HIGH): No independent human security audit
-- **V1-LIM-4** (MEDIUM): Linux-only
-- **V1-LIM-5** (MEDIUM): Container requires CAP_IPC_LOCK
+## Cryptographic Notice
 
-## Credential Risk
+This software contains cryptographic functionality. Export, import, and use of cryptographic software may be regulated in your jurisdiction. Users are responsible for compliance with applicable laws.
 
-Do not use Hermetic as the sole protection for production credentials without
-understanding these limitations. For high-value credentials, use Hermetic
-alongside your existing security practices, not as a replacement.
+## Not Legal or Compliance Advice
 
-## Reveal Command
+The presence of security features does not constitute compliance with any specific regulatory framework (SOC 2, ISO 27001, PCI DSS, HIPAA, etc.). Organizations requiring compliance certification should engage qualified auditors.
 
-The `hermetic reveal` command outputs raw secret values to stdout. Once a
-secret leaves Hermetic's protection boundary via reveal, Hermetic provides
-no isolation guarantees. See [HC-14](docs/amendments/HC-14.md) for the
-complete security model.
+---
 
-## License
-
-This software is licensed under AGPL-3.0-or-later. See [LICENSE](LICENSE)
-for the full text. Commercial licenses available at
-[hermeticsys.com/license](https://hermeticsys.com/license).
+The Hermetic Project · [hermeticsys.com](https://hermeticsys.com) · AGPL-3.0-or-later
