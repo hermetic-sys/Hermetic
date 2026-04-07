@@ -408,6 +408,14 @@ With MCP, OpenClaw skills can use `hermetic_authenticated_request` instead of re
 
 ---
 
+## Why Is This 50K Lines?
+
+Could you build "store a secret, return it" in 500 lines? Absolutely. But then any Python script on your machine can connect to the socket and grab your keys — which is exactly the problem when AI agents are running arbitrary code as your UID.
+
+The complexity isn't the encryption. It's making sure the wrong process can't get to what's encrypted: binary attestation, per-message sender verification, process-bound tokens, credential leak scanning, tool definition pinning, SSRF blocking, DNS pinning, interpreter blocklists, and memory hardening. Each one exists because a real attack was demonstrated without it.
+
+---
+
 ## Community vs Pro
 
 | | Community (Free) | Pro ($10/mo) |
