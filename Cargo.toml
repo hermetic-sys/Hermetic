@@ -2,7 +2,6 @@
 members = [
     "crates/hermetic-core",
     "crates/hermetic-transport",
-    "crates/hermetic-sdk",
 ]
 resolver = "2"
 
