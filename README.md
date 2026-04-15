@@ -79,7 +79,7 @@ Single static binary (Rust, no runtime dependencies). No Docker. No cloud accoun
 
 ### Requirements
 
-- **Linux x86_64** (macOS and Windows support planned)
+- **Linux x86_64** only
 - **Memory lock permission** — Hermetic locks secrets in RAM to prevent swapping to disk. Most systems need:
   ```bash
   # Check current limit

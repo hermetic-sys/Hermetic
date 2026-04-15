@@ -9,18 +9,18 @@ This changelog covers the AGPL-licensed crates (hermetic-core, hermetic-transpor
 ### Added
 
 **hermetic-core**
-- Vault secret_type detection for all 4 types: static, oauth2, aws_sigv4, jwt_key, ssh_key
+- Vault secret type detection for all credential types (static, OAuth2, AWS, JWT, SSH)
 
 **hermetic-transport**
-- `pool_max_idle_per_host(0)` — no connection reuse across requests (HC-25)
-- `set_sensitive(true)` on injected credential headers (HC-25)
+- Connection pool isolation — no connection reuse across credential-bearing requests
+- Credential headers marked as sensitive to prevent logging exposure
 - Custom header auth scheme (`header:<name>`) for APIs with non-standard headers
 
 ### Binary features (pre-built)
 - SSH Agent protocol: Ed25519, RSA SHA-256/SHA-512, ECDSA P-256
-- JWT signing Phase 2: GitHub Apps, Azure AD PS256, ES256, Custom provider
-- Credential redaction on `hermetic run` stdout/stderr
-- Auth scheme auto-resolution from secret tags
+- JWT signing: GitHub Apps, Azure AD (PS256), ES256, Custom provider
+- Credential redaction on command output (stdout/stderr scanning)
+- Auth scheme auto-resolution from secret metadata
 - Session persistence interactive prompt
 - New commands: ssh-keygen, ssh-allow, ssh-status, add --ssh-key, jwt-test, request --auth-scheme
 
