@@ -10,6 +10,7 @@
   <a href="https://hermeticsys.com">Website</a> ·
   <a href="#install">Install</a> ·
   <a href="#how-it-works">How It Works</a> ·
+  <a href="#ssh-agent">SSH Agent</a> ·
   <a href="#mcp-proxy">MCP Proxy</a> ·
   <a href="#openclaw-integration">OpenClaw</a> ·
   <a href="SECURITY.md">Security</a>
@@ -142,6 +143,7 @@ What happens:
   6. Agent gets exit code, never sees the key
                                                      
   Credential exposure: ~milliseconds (child process lifetime)
+  stdout/stderr scanned — leaked credentials redacted
   Dangerous interpreters blocked by default
   Child runs in isolated, dump-protected process group
 ```
@@ -230,6 +232,38 @@ The proxy does six things simultaneously:
 | **Per-tool policy** | Allow/deny rules per tool name | Block dangerous tools while keeping useful ones |
 | **Process isolation** | Child in new process group, sanitized env, dump-protected | MCP server can't read parent memory |
 | **Clean shutdown** | Kills entire process tree on exit | No orphaned server processes |
+
+---
+
+<a name="ssh-agent"></a>
+## SSH Agent — Your Keys Never Leave the Vault
+
+Hermetic speaks the standard SSH agent protocol. Set `SSH_AUTH_SOCK` and every `git push`, `scp`, `rsync`, and SSH connection uses keys from the encrypted vault — without extracting them to `~/.ssh/`.
+
+```bash
+# Start daemon with SSH agent
+hermetic start --ssh-agent
+
+# Source the env file (add to .bashrc/.zshrc)
+source ~/.hermetic/ssh-agent.env
+
+# Generate a key (stored in vault, never on disk)
+hermetic ssh-keygen --type ed25519 --name github-ssh
+
+# Or import an existing key
+hermetic add --ssh-key ~/.ssh/id_ed25519
+
+# Verify — your key appears
+ssh-add -l
+# 256 SHA256:... github-ssh (ED25519)
+
+# Use normally — git, scp, rsync all work
+git push origin main
+```
+
+**Supported algorithms:** Ed25519, RSA (SHA-256, SHA-512), ECDSA P-256. SHA-1 signing rejected.
+
+The daemon performs all cryptographic operations internally. The SSH client connects to Hermetic's socket, requests a signature, and the daemon signs with the private key from the vault. The key bytes never enter the SSH client's memory.
 
 ---
 
@@ -423,10 +457,14 @@ The complexity isn't the encryption. It's making sure the wrong process can't ge
 | **All security features** | ✓ Full | ✓ Full |
 | ★★★ Brokered requests | ✓ | ✓ |
 | MCP Proxy + leak scanning | ✓ | ✓ |
+| SSH Agent (Ed25519, RSA, ECDSA) | ✓ | ✓ |
 | Binary attestation | ✓ | ✓ |
+| Credential redaction on stdout | ✓ | ✓ |
 | Secrets | 10 | Unlimited |
 | Environments | 1 | Unlimited |
 | OAuth2 auto-refresh | — | ✓ |
+| JWT signing (GCP, GitHub, Azure) | — | ✓ |
+| AWS SigV4 request signing | — | ✓ |
 | Credential health monitoring | — | ✓ |
 | Token usage analytics | — | ✓ |
 | Dashboards (TUI + web) | — | ✓ |
@@ -450,7 +488,6 @@ This repository contains the open-source cryptographic core:
 ```
 crates/hermetic-core/       — AES-256-GCM vault, Argon2id KDF, HKDF key hierarchy, audit chain
 crates/hermetic-transport/  — HTTPS executor, SSRF defense, DNS pinning, auth injection
-crates/hermetic-sdk/        — Python SDK (PyO3)
 ```
 
 The daemon, MCP bridge, proxy, and CLI are distributed as a pre-built binary.
